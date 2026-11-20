@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truth or False | the-express.com</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chivo+Mono:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        express: {
+                            red: '#E50914',
+                            darkRed: '#B20710',
+                            navy: '#0B1325',
+                            cardBg: '#151F32',
+                            border: '#2A3854',
+                            truthPink: '#DE1C6E',
+                            truthPurple: '#6B11B0'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        mono: ['Chivo Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar and ambient animation */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B1325;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2A3854;
+            border-radius: 4px;
+        }
+        .truth-gradient-text {
+            background: linear-gradient(135deg, #FF3E8D 0%, #A242FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .express-badge-gradient {
+            background: linear-gradient(135deg, #E50914 0%, #80060D 100%);
+        }
+        .truth-border-glow {
+            box-shadow: 0 0 25px rgba(222, 28, 110, 0.15);
+        }
+        .pulse-subtle {
+            animation: pulseSubtle 3s infinite ease-in-out;
+        }
+        @keyframes pulseSubtle {
+            0%, 100% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.008); }
+        }
+        /* Confetti Canvas overlay */
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-express-navy text-slate-100 font-sans min-h-screen flex flex-col justify-between selection:bg-express-red selection:text-white relative overflow-x-hidden">
+
+    <!-- Confetti Canvas -->
+    <canvas id="confetti-canvas"></canvas>
+
+    <!-- TOP PUBLICATION HEADER -->
+    <header class="border-b border-express-border bg-express-navy/90 backdrop-blur-md sticky top-0 z-40">
+        <!-- Top Breaking News Bar -->
+        <div class="bg-express-red text-white text-xs font-bold py-1 px-4 text-center tracking-widest uppercase flex items-center justify-center space-x-2">
+            <span class="inline-block w-2 h-2 rounded-full bg-white animate-ping"></span>
+            <span>The Express Digital Interactive Special</span>
+        </div>
+
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-express-navy font-black text-xl px-2 py-0.5 rounded shadow tracking-tighter uppercase font-serif">
+                    EXPRESS
+                </div>
+                <div class="hidden sm:block text-xs border-l border-slate-700 pl-3 text-slate-400">
+                    <span class="font-bold text-slate-200">the-express.com</span> &bull; Political Fact Check Quiz
+                </div>
+            </div>
+
+            <!-- Controls (Sound & Restart) -->
+            <div class="flex items-center space-x-3 text-sm">
+                <button id="sound-toggle-btn" class="p-2 rounded-lg bg-express-cardBg border border-express-border hover:bg-slate-800 transition text-slate-300 hover:text-white" title="Toggle Audio">
+                    <i id="sound-icon" class="fas fa-volume-up"></i>
+                </button>
+                <div class="bg-express-cardBg border border-express-border px-3 py-1.5 rounded-lg flex items-center space-x-2">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Streak</span>
+                    <span id="streak-count" class="font-mono font-bold text-yellow-400">0 🔥</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-4xl w-full mx-auto px-4 py-6 flex-grow flex flex-col justify-center">
+
+        <!-- INTRO SCREEN -->
+        <div id="intro-screen" class="bg-express-cardBg border border-express-border rounded-2xl p-6 sm:p-10 shadow-2xl text-center truth-border-glow transition-all duration-500">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-express-red/10 border border-express-red/30 text-express-red text-xs font-bold tracking-wide uppercase mb-4">
+                <i class="fas fa-fire"></i>
+                <span>Can You Spot The Difference?</span>
+            </div>
+            
+            <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight mb-4 font-serif">
+                <span class="text-white">Truth</span> <span class="text-slate-400">or</span> <span class="truth-gradient-text">False?</span>
+            </h1>
+            
+            <p class="text-slate-300 text-base sm:text-lg max-w-2xl mx-auto mb-8 leading-relaxed">
+                Test your knowledge of viral political posts! We present simulated posts attributed to <strong>@realDonaldTrump</strong>. 
+                Your mission: determine if it’s a <strong>real post</strong> from Truth Social or an <strong>AI-generated fake</strong>.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mb-8 text-left text-xs sm:text-sm">
+                <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
+                    <div class="font-bold text-white mb-1 flex items-center space-x-2">
+                        <i class="fas fa-bullhorn text-express-red"></i>
+                        <span>Outlandish & Real</span>
+                    </div>
+                    <div class="text-slate-400">Some of the most outrageous statements were actually posted!</div>
+                </div>
+                <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
+                    <div class="font-bold text-white mb-1 flex items-center space-x-2">
+                        <i class="fas fa-robot text-purple-400"></i>
+                        <span>AI Synthesized</span>
+                    </div>
+                    <div class="text-slate-400">Sneaky AI fakes engineered to mimic the signature style.</div>
+                </div>
+                <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800">
+                    <div class="font-bold text-white mb-1 flex items-center space-x-2">
+                        <i class="fas fa-trophy text-yellow-400"></i>
+                        <span>Score & Rank</span>
+                    </div>
+                    <div class="text-slate-400">Earn badges based on your political statement accuracy.</div>
+                </div>
+            </div>
+
+            <button id="start-btn" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-express-red to-red-700 hover:from-red-500 hover:to-express-red text-white text-lg font-bold rounded-xl shadow-lg transition transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-3 mx-auto cursor-pointer">
+                <span>Start The Game</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- GAMEPLAY SCREEN -->
+        <div id="game-screen" class="hidden flex-col transition-all duration-500">
+            
+            <!-- STATS HEADER BAR -->
+            <div class="flex items-center justify-between mb-4 bg-express-cardBg/80 px-4 py-2.5 rounded-xl border border-express-border text-sm">
+                <div class="flex items-center space-x-2 font-mono">
+                    <span class="text-slate-400">Post</span>
+                    <span id="current-question-num" class="font-bold text-white">1</span>
+                    <span class="text-slate-400">of</span>
+                    <span id="total-questions-num" class="font-bold text-white">8</span>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="w-1/3 sm:w-1/2 bg-slate-800 h-2.5 rounded-full overflow-hidden border border-slate-700">
+                    <div id="progress-bar" class="bg-gradient-to-r from-express-red to-purple-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+
+                <div class="flex items-center space-x-2 font-mono">
+                    <span class="text-slate-400">Score:</span>
+                    <span id="score-display" class="font-bold text-green-400">0</span>
+                </div>
+            </div>
+
+            <!-- MAIN SOCIAL MEDIA POST CARD -->
+            <div id="post-card" class="bg-[#101726] border border-express-border rounded-2xl p-5 sm:p-7 shadow-2xl relative overflow-hidden transition duration-300">
+                
+                <!-- Truth Social Header Simulation -->
+                <div class="flex items-start justify-between mb-4 pb-3 border-b border-slate-800">
+                    <div class="flex items-center space-x-3">
+                        <!-- Profile Image Placeholder -->
+                        <div class="relative">
+                            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-amber-600 via-red-600 to-yellow-500 flex items-center justify-center font-extrabold text-white text-xl shadow-inner border-2 border-white/20">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <span class="absolute -bottom-1 -right-1 bg-red-600 text-white rounded-full p-0.5 text-[10px] w-4 h-4 flex items-center justify-center">
+                                <i class="fas fa-flag-usa"></i>
+                            </span>
+                        </div>
+
+                        <div>
+                            <div class="flex items-center space-x-1.5">
+                                <span class="font-bold text-white text-base sm:text-lg hover:underline cursor-pointer">Donald J. Trump</span>
+                                <span class="text-blue-400 text-sm" title="Verified Account">
+                                    <i class="fas fa-check-circle"></i>
+                                </span>
+                            </div>
+                            <div class="text-xs text-slate-400 flex items-center space-x-2 font-mono">
+                                <span>@realDonaldTrump</span>
+                                <span>&bull;</span>
+                                <span id="post-timestamp">Truth Social</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Truth Social Logo Tag -->
+                    <div class="bg-gradient-to-r from-pink-600/20 to-purple-600/20 text-pink-300 text-xs px-2.5 py-1 rounded-full font-bold border border-pink-500/30 flex items-center space-x-1.5">
+                        <i class="fas fa-quote-left text-[10px]"></i>
+                        <span>TRUTH SOCIAL</span>
+                    </div>
+                </div>
+
+                <!-- POST CONTENT TEXT -->
+                <div class="py-2 sm:py-4">
+                    <p id="post-text" class="text-lg sm:text-2xl font-medium text-slate-100 leading-relaxed font-sans whitespace-pre-line tracking-normal">
+                        <!-- Dynamic Post Text -->
+                    </p>
+                </div>
+
+                <!-- Fake Engagement Footer -->
+                <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-slate-400 text-xs sm:text-sm font-mono">
+                    <div class="flex items-center space-x-6">
+                        <span class="hover:text-pink-400 transition cursor-pointer"><i class="fas fa-[#FAFAFA] fa-retweet mr-1.5 text-slate-500"></i><span id="retruth-count">14.2k</span></span>
+                        <span class="hover:text-red-400 transition cursor-pointer"><i class="far fa-heart mr-1.5 text-slate-500"></i><span id="like-count">48.9k</span></span>
+                        <span class="hover:text-blue-400 transition cursor-pointer"><i class="far fa-comment mr-1.5 text-slate-500"></i><span id="reply-count">6.1k</span></span>
+                    </div>
+                    <div class="text-slate-500">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REVEAL EXPLANATION BANNER (Hidden initially) -->
+            <div id="explanation-box" class="hidden mt-4 p-5 rounded-2xl border transition-all duration-300">
+                <div class="flex items-start space-x-3">
+                    <div id="explanation-icon" class="text-2xl pt-0.5">
+                        <!-- Icon injected -->
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <h3 id="explanation-title" class="font-extrabold text-lg uppercase tracking-wider">
+                                <!-- CORRECT / INCORRECT -->
+                            </h3>
+                            <span id="post-verdict-badge" class="px-2.5 py-0.5 text-xs font-bold rounded-full uppercase font-mono">
+                                <!-- REAL TRUTH vs FAKE AI -->
+                            </span>
+                        </div>
+                        <p id="explanation-text" class="text-sm text-slate-200 leading-relaxed">
+                            <!-- Detailed breakdown -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS SECTION -->
+            <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                <!-- TRUTH BUTTON (REAL) -->
+                <button id="btn-truth" onclick="handleAnswer(true)" class="flex-1 py-4 px-6 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-500 hover:to-green-500 active:scale-98 text-white rounded-xl font-black text-xl tracking-wider shadow-lg transition duration-200 flex items-center justify-center space-x-3 border border-green-400/30">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                    <div class="text-left">
+                        <div class="leading-none">TRUTH</div>
+                        <div class="text-[11px] font-normal text-emerald-100 uppercase tracking-widest opacity-80">Real Post</div>
+                    </div>
+                </button>
+
+                <!-- FALSE BUTTON (FAKE) -->
+                <button id="btn-false" onclick="handleAnswer(false)" class="flex-1 py-4 px-6 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 active:scale-98 text-white rounded-xl font-black text-xl tracking-wider shadow-lg transition duration-200 flex items-center justify-center space-x-3 border border-red-400/30">
+                    <i class="fas fa-times-circle text-2xl"></i>
+                    <div class="text-left">
+                        <div class="leading-none">FALSE</div>
+                        <div class="text-[11px] font-normal text-red-100 uppercase tracking-widest opacity-80">Fake / AI</div>
+                    </div>
+                </button>
+
+                <!-- NEXT POST BUTTON (Shown after answer) -->
+                <button id="btn-next" onclick="nextQuestion()" class="hidden flex-1 py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl font-black text-xl tracking-wider shadow-lg transition duration-200 flex items-center justify-center space-x-3 border border-blue-400/30">
+                    <span>NEXT POST</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- END GAME / RESULTS SCREEN -->
+        <div id="results-screen" class="hidden bg-express-cardBg border border-express-border rounded-2xl p-6 sm:p-10 shadow-2xl text-center transition-all duration-500">
+            <div class="inline-block px-3 py-1 bg-express-navy border border-express-border rounded-full text-xs font-bold text-slate-300 uppercase tracking-widest mb-4">
+                Quiz Complete
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-2 font-serif">Final Verdict</h2>
+            <p class="text-slate-400 text-sm mb-6">Here is how well you can spot real political posts vs AI fakes:</p>
+
+            <!-- Score Circle Display -->
+            <div class="my-6 relative w-40 h-40 mx-auto flex items-center justify-center rounded-full bg-slate-900 border-4 border-express-border shadow-inner">
+                <div class="text-center">
+                    <span id="final-score-percent" class="block text-4xl font-black text-white font-mono">0%</span>
+                    <span id="final-score-fraction" class="text-sm font-semibold text-slate-400 font-mono">0 / 0 Correct</span>
+                </div>
+            </div>
+
+            <!-- Rank Badge & Description -->
+            <div id="rank-badge-box" class="p-4 rounded-xl bg-slate-900/80 border border-slate-800 max-w-md mx-auto mb-8">
+                <div id="rank-title" class="font-extrabold text-xl text-yellow-400 mb-1 uppercase tracking-wide">
+                    <!-- Dynamic Rank Title -->
+                </div>
+                <p id="rank-desc" class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                    <!-- Dynamic Description -->
+                </p>
+            </div>
+
+            <!-- Detailed breakdown list of answered questions -->
+            <div class="mb-8 text-left max-w-xl mx-auto">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-1">Breakdown & Summary:</h3>
+                <div id="summary-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <!-- Dynamic summary list items inserted via JS -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                <button id="restart-btn" onclick="restartGame()" class="flex-1 px-6 py-3.5 bg-gradient-to-r from-express-red to-red-700 hover:from-red-500 hover:to-express-red text-white font-bold rounded-xl shadow-lg transition transform hover:scale-105 active:scale-95 flex items-center justify-center space-x-2">
+                    <i class="fas fa-redo"></i>
+                    <span>Play Again</span>
+                </button>
+
+                <button id="share-btn" onclick="shareScore()" class="flex-1 px-6 py-3.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold rounded-xl shadow transition flex items-center justify-center space-x-2">
+                    <i class="fas fa-share-alt"></i>
+                    <span>Share Score</span>
+                </button>
+            </div>
+            
+            <div id="share-toast" class="hidden mt-4 text-xs font-mono text-emerald-400 transition">
+                <i class="fas fa-check mr-1"></i> Results copied to clipboard!
+            </div>
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-express-border py-4 text-center text-xs text-slate-500 bg-express-navy">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div>
+                &copy; <span id="year-display"></span> <strong class="text-slate-400">the-express.com</strong>. All rights reserved.
+            </div>
+            <div class="text-slate-600 text-[11px]">
+                Interactive political trivia experience. Built for mobile & desktop browsing.
+            </div>
+        </div>
+    </footer>
+
+    <!-- GAME LOGIC JAVASCRIPT -->
+    <script>
+        // Set dynamic year
+        document.getElementById('year-display').textContent = new Date().getFullYear();
+
+        // -------------------------------------------------------------
+        // AUDIO SYNTHESIZER (Web Audio API - No external files needed!)
+        // -------------------------------------------------------------
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                    }
+                }
+            }
+
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            playIncorrect() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now); // A3
+                osc.frequency.setValueAtTime(140, now + 0.15); // Low rumble
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.05);
+            }
+        }
+
+        const soundFX = new SoundFX();
+
+        // Sound Toggle Button Handler
+        const soundBtn = document.getElementById('sound-toggle-btn');
+        const soundIcon = document.getElementById('sound-icon');
+        soundBtn.addEventListener('click', () => {
+            soundFX.enabled = !soundFX.enabled;
+            if (soundFX.enabled) {
+                soundIcon.className = 'fas fa-volume-up';
+                soundBtn.classList.remove('text-red-400');
+            } else {
+                soundIcon.className = 'fas fa-volume-mute';
+                soundBtn.classList.add('text-red-400');
+            }
+        });
+
+        // -------------------------------------------------------------
+        // QUESTION DATASET (Real Truth Social Posts vs Fake AI Posts)
+        // -------------------------------------------------------------
+        const rawQuestionData = [
+            {
+                id: 1,
+                text: "I HATE TAYLOR SWIFT!",
+                isTruth: true,
+                date: "September 2024",
+                explanation: "REAL POST! Posted on Truth Social in all caps on September 15, 2024, shortly after Taylor Swift publicly endorsed Kamala Harris following the presidential debate."
+            },
+            {
+                id: 2,
+                text: "The seriously retarded Governor of Minnesota, Tim Walz, does nothing, either through fear, incompetence, or both...",
+                isTruth: true,
+                date: "Thanksgiving 2025",
+                explanation: "REAL POST! This controversial statement was part of a series of Truth Social commentary posts critiquing state leadership."
+            },
+            {
+                id: 3,
+                text: "Just spoke with the ghost of Abraham Lincoln. Great guy, very tall. He said I'm doing a better job than he did!",
+                isTruth: false,
+                date: "AI Generated / Fake",
+                explanation: "FAKE! Created by AI. While Trump has frequently drawn comparisons between himself and Abraham Lincoln, he has never claimed to converse with his ghost."
+            },
+            {
+                id: 4,
+                text: "Trash Island is currently the worst golf course anywhere in the world. The fairways are far too close together... All you hear is the sound of people screaming, 'FORE!'",
+                isTruth: true,
+                date: "November 2026",
+                explanation: "REAL POST! Posted on Truth Social in November 2026, offering a detailed and scathing critique of the layout and sound conditions of a golf venue."
+            },
+            {
+                id: 5,
+                text: "I am appointing Hulk Hogan to be the next Secretary of Defense. A very strong man who knows how to lay down the law!",
+                isTruth: false,
+                date: "AI Generated / Fake",
+                explanation: "FAKE! Though Hulk Hogan spoke prominently at the 2024 Republican National Convention, he was never appointed or officially nominated to head the Department of Defense."
+            },
+            {
+                id: 6,
+                text: "UKRAINE 'LEADERSHIP' HAS EXPRESSED ZERO GRATITUDE FOR OUR EFFORTS",
+                isTruth: true,
+                date: "November 2025",
+                explanation: "REAL POST! Posted in all-caps on Truth Social in late 2025 regarding foreign aid and defense expenditure allocations."
+            },
+            {
+                id: 7,
+                text: "I just watched Star Wars for the first time. Darth Vader was treated very unfairly by the radical left Jedi.",
+                isTruth: false,
+                date: "AI Generated / Fake",
+                explanation: "FAKE! A popular internet parody meme crafted to match Trump's distinctive vocabulary and commentary style."
+            },
+            {
+                id: 8,
+                text: "McDonald's is introducing a new Trump Burger. It's the biggest burger they've ever made. The fake news media will probably say it's too big!",
+                isTruth: false,
+                date: "AI Generated / Fake",
+                explanation: "FAKE! While Trump's fondness for McDonald's fast food is well-documented, McDonald's never launched an official 'Trump Burger'."
+            },
+            {
+                id: 9,
+                text: "HAPPY THANKSGIVING TO ALL, including the Radical Left Lunatics, Fake News Media, and the Weak and Pathetic RINOs who are trying so hard to destroy our Country!",
+                isTruth: true,
+                date: "Holiday Post",
+                explanation: "REAL POST! Trump regularly crafts custom holiday greetings addressed to political rivals, critics, and supporters alike."
+            },
+            {
+                id: 10,
+                text: "I have just signed an Executive Order banning low-flow toilets. We need strong, powerful water pressure in America again!",
+                isTruth: false,
+                date: "AI Generated / Fake",
+                explanation: "FAKE! Although Trump frequently complained about low-flow bathroom fixtures during speeches, no Executive Order of this specific title was issued."
+            }
+        ];
+
+        // -------------------------------------------------------------
+        // GAME STATE MANAGEMENT
+        // -------------------------------------------------------------
+        let questions = [];
+        let currentIndex = 0;
+        let score = 0;
+        let currentStreak = 0;
+        let userAnswers = []; // Store object of { question, userAnswer, isCorrect }
+
+        // Fisher-Yates Shuffle Algorithm
+        function shuffleDeck(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // Random generator for fake engagement stats
+        function generateRandomMetrics() {
+            const retruths = (Math.floor(Math.random() * 25) + 5).toFixed(1) + 'k';
+            const likes = (Math.floor(Math.random() * 80) + 20).toFixed(1) + 'k';
+            const replies = (Math.floor(Math.random() * 15) + 2).toFixed(1) + 'k';
+            
+            document.getElementById('retruth-count').textContent = retruths;
+            document.getElementById('like-count').textContent = likes;
+            document.getElementById('reply-count').textContent = replies;
+        }
+
+        // START GAME
+        document.getElementById('start-btn').addEventListener('click', startGame);
+
+        function startGame() {
+            soundFX.playClick();
+            questions = shuffleDeck(rawQuestionData);
+            currentIndex = 0;
+            score = 0;
+            currentStreak = 0;
+            userAnswers = [];
+
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('flex');
+
+            updateStreakDisplay();
+            loadQuestion();
+        }
+
+        function updateStreakDisplay() {
+            document.getElementById('streak-count').textContent = `${currentStreak} 🔥`;
+        }
+
+        // LOAD QUESTION
+        function loadQuestion() {
+            const q = questions[currentIndex];
+            
+            // Update HUD Stats
+            document.getElementById('current-question-num').textContent = currentIndex + 1;
+            document.getElementById('total-questions-num').textContent = questions.length;
+            document.getElementById('score-display').textContent = score;
+
+            // Update Progress Bar
+            const pct = ((currentIndex) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${pct}%`;
+
+            // Update Card Content
+            document.getElementById('post-text').textContent = `"${q.text}"`;
+            document.getElementById('post-timestamp').textContent = q.date || "Truth Social";
+            generateRandomMetrics();
+
+            // Reset Card Animation & Styles
+            const card = document.getElementById('post-card');
+            card.className = "bg-[#101726] border border-express-border rounded-2xl p-5 sm:p-7 shadow-2xl relative overflow-hidden transition duration-300";
+
+            // Hide Explanation & Show Action Buttons
+            document.getElementById('explanation-box').classList.add('hidden');
+            
+            const btnTruth = document.getElementById('btn-truth');
+            const btnFalse = document.getElementById('btn-false');
+            const btnNext = document.getElementById('btn-next');
+
+            btnTruth.classList.remove('hidden');
+            btnFalse.classList.remove('hidden');
+            btnNext.classList.add('hidden');
+
+            btnTruth.disabled = false;
+            btnFalse.disabled = false;
+        }
+
+        // HANDLE USER ANSWER
+        function handleAnswer(userGuessedTruth) {
+            const q = questions[currentIndex];
+            const isCorrect = (userGuessedTruth === q.isTruth);
+
+            // Disable buttons to prevent double click
+            document.getElementById('btn-truth').disabled = true;
+            document.getElementById('btn-false').disabled = true;
+
+            // Track Answer
+            if (isCorrect) {
+                score++;
+                currentStreak++;
+                soundFX.playCorrect();
+            } else {
+                currentStreak = 0;
+                soundFX.playIncorrect();
+            }
+            updateStreakDisplay();
+            document.getElementById('score-display').textContent = score;
+
+            userAnswers.push({
+                question: q,
+                userGuessedTruth: userGuessedTruth,
+                isCorrect: isCorrect
+            });
+
+            // Show Visual Card Highlight & Explanation Box
+            const card = document.getElementById('post-card');
+            const expBox = document.getElementById('explanation-box');
+            const expIcon = document.getElementById('explanation-icon');
+            const expTitle = document.getElementById('explanation-title');
+            const expBadge = document.getElementById('post-verdict-badge');
+            const expText = document.getElementById('explanation-text');
+
+            if (isCorrect) {
+                card.classList.add('ring-2', 'ring-emerald-500', 'bg-emerald-950/20');
+                expBox.className = "mt-4 p-5 rounded-2xl border border-emerald-500/40 bg-emerald-950/40 transition-all duration-300 animate-fadeIn";
+                expIcon.className = "text-emerald-400 text-2xl pt-0.5";
+                expIcon.innerHTML = `<i class="fas fa-check-circle"></i>`;
+                expTitle.className = "font-extrabold text-lg uppercase tracking-wider text-emerald-400";
+                expTitle.textContent = "CORRECT!";
+            } else {
+                card.classList.add('ring-2', 'ring-rose-500', 'bg-rose-950/20');
+                expBox.className = "mt-4 p-5 rounded-2xl border border-rose-500/40 bg-rose-950/40 transition-all duration-300 animate-fadeIn";
+                expIcon.className = "text-rose-400 text-2xl pt-0.5";
+                expIcon.innerHTML = `<i class="fas fa-times-circle"></i>`;
+                expTitle.className = "font-extrabold text-lg uppercase tracking-wider text-rose-400";
+                expTitle.textContent = "INCORRECT!";
+            }
+
+            // Post Verdict Badge styling
+            if (q.isTruth) {
+                expBadge.className = "px-2.5 py-0.5 text-xs font-bold rounded-full uppercase font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                expBadge.textContent = "ACTUAL REAL POST";
+            } else {
+                expBadge.className = "px-2.5 py-0.5 text-xs font-bold rounded-full uppercase font-mono bg-purple-500/20 text-purple-300 border border-purple-500/30";
+                expBadge.textContent = "FAKE / AI GENERATED";
+            }
+
+            expText.textContent = q.explanation;
+            expBox.classList.remove('hidden');
+
+            // Swap Buttons to Next Post
+            document.getElementById('btn-truth').classList.add('hidden');
+            document.getElementById('btn-false').classList.add('hidden');
+            
+            const btnNext = document.getElementById('btn-next');
+            btnNext.classList.remove('hidden');
+            
+            // Text change on last question
+            if (currentIndex === questions.length - 1) {
+                btnNext.innerHTML = `<span>SEE FINAL SCORE</span> <i class="fas fa-trophy"></i>`;
+            } else {
+                btnNext.innerHTML = `<span>NEXT POST</span> <i class="fas fa-arrow-right"></i>`;
+            }
+        }
+
+        // NEXT QUESTION OR FINISH
+        function nextQuestion() {
+            soundFX.playClick();
+            currentIndex++;
+            if (currentIndex < questions.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        // SHOW RESULTS SCREEN
+        function showResults() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+
+            document.getElementById('final-score-percent').textContent = `${percentage}%`;
+            document.getElementById('final-score-fraction').textContent = `${score} / ${total} Correct`;
+
+            // Progress Bar completion
+            document.getElementById('progress-bar').style.width = `100%`;
+
+            // Determine Rank Title & Description
+            const rankTitle = document.getElementById('rank-title');
+            const rankDesc = document.getElementById('rank-desc');
+
+            if (percentage === 100) {
+                rankTitle.textContent = "🏆 TRUMP WHISPERER";
+                rankTitle.className = "font-extrabold text-xl text-yellow-400 mb-1 uppercase tracking-wide";
+                rankDesc.textContent = "Flawless score! You can spot real Truth Social posts with 100% precision. Nothing gets past your fact-checking radar!";
+                triggerConfetti();
+            } else if (percentage >= 70) {
+                rankTitle.textContent = "🎯 POLITICAL FACT-CHECKER";
+                rankTitle.className = "font-extrabold text-xl text-emerald-400 mb-1 uppercase tracking-wide";
+                rankDesc.textContent = "Impressive performance! You have a keen eye for subtle stylistic cues and outlandish real posts.";
+            } else if (percentage >= 40) {
+                rankTitle.textContent = "📰 CASUAL NEWS READER";
+                rankTitle.className = "font-extrabold text-xl text-blue-400 mb-1 uppercase tracking-wide";
+                rankDesc.textContent = "Not bad! Some of those real posts sound so outlandish they fooled you, or AI caught you off guard!";
+            } else {
+                rankTitle.textContent = "🌀 FAKE NEWS VICTIM";
+                rankTitle.className = "font-extrabold text-xl text-rose-400 mb-1 uppercase tracking-wide";
+                rankDesc.textContent = "AI got the best of you! Don't worry—the line between real social media posts and fake satire is thinner than ever.";
+            }
+
+            // Populate Breakdown List
+            const summaryList = document.getElementById('summary-list');
+            summaryList.innerHTML = '';
+
+            userAnswers.forEach((ans, idx) => {
+                const item = document.createElement('div');
+                item.className = `p-3 rounded-xl border text-xs flex items-center justify-between ${
+                    ans.isCorrect 
+                        ? 'bg-emerald-950/30 border-emerald-800/50 text-slate-200' 
+                        : 'bg-rose-950/30 border-rose-800/50 text-slate-200'
+                }`;
+
+                const textSnippet = ans.question.text.length > 55 
+                    ? ans.question.text.substring(0, 55) + '...' 
+                    : ans.question.text;
+
+                const tagText = ans.question.isTruth ? 'REAL' : 'FAKE';
+                const tagColor = ans.question.isTruth ? 'text-emerald-400' : 'text-purple-400';
+
+                item.innerHTML = `
+                    <div class="flex items-center space-x-2.5 overflow-hidden pr-2">
+                        <span class="${ans.isCorrect ? 'text-emerald-400' : 'text-rose-400'} font-bold">
+                            <i class="fas ${ans.isCorrect ? 'fa-check' : 'fa-times'}"></i>
+                        </span>
+                        <span class="truncate font-sans font-medium">#${idx+1}: "${textSnippet}"</span>
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0">
+                        <span class="font-mono text-[10px] uppercase px-2 py-0.5 rounded bg-slate-900 border border-slate-700 ${tagColor} font-bold">
+                            ${tagText}
+                        </span>
+                    </div>
+                `;
+                summaryList.appendChild(item);
+            });
+        }
+
+        // RESTART GAME
+        function restartGame() {
+            soundFX.playClick();
+            startGame();
+        }
+
+        // SHARE SCORE FUNCTION
+        function shareScore() {
+            soundFX.playClick();
+            const total = questions.length;
+            const percentage = Math.round((score / total) * 100);
+            const shareText = `Truth or False @ the-express.com 🎯\nScore: ${score}/${total} (${percentage}% accuracy)!\nCan you tell real Trump posts from AI fakes?\nTry it here!`;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(shareText).then(showShareToast).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                const textarea = document.createElement('textarea');
+                textarea.value = shareText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showShareToast();
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function showShareToast() {
+                const toast = document.getElementById('share-toast');
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // CONFETTI ANIMATION ENGINE
+        function triggerConfetti() {
+            const canvas = document.getElementById('confetti-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#E50914', '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899'];
+
+            for (let i = 0; i < 90; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360,
+                    rotSpeed: Math.random() * 6 - 3
+                });
+            }
+
+            let animationFrame;
+            let duration = 0;
+
+            function render() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rotation += p.rotSpeed;
+
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                    ctx.restore();
+                });
+
+                duration++;
+                if (duration < 180) {
+                    animationFrame = requestAnimationFrame(render);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+
+            render();
+        }
+
+        // Handle Window Resize for Canvas
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confetti-canvas');
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+    </script>
+</body>
+</html>
